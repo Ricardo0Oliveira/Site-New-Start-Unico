@@ -106,6 +106,8 @@ const aulas = {
         ]
     }
 };
+let aulaAtual = "aula1";
+let respostasCorretas = 0;
 
 function mudarConteudo(aula) {
     // Verifica se a aula existe
@@ -115,15 +117,24 @@ function mudarConteudo(aula) {
     }
 
     // Atualiza o vídeo
+   let aulaAtual = "aula1";
+let respostasCorretas = 0;
+
+function mudarConteudo(aula) {
+    if (!aulas[aula]) {
+        console.error("Aula não encontrada!");
+        return;
+    }
+
+    // Atualiza o conteúdo da aula
+    aulaAtual = aula;
     const videoIframe = document.getElementById("video-aula");
     videoIframe.src = aulas[aula].video;
 
-    // Atualiza a documentação
     const docTitulo = document.getElementById("documentacao-aula");
     docTitulo.querySelector('h2').textContent = aulas[aula].documentacao.titulo;
     docTitulo.querySelector('p').textContent = aulas[aula].documentacao.descricao;
 
-    // Atualiza as questões
     const questoesContainer = document.getElementById("questoes-teste");
     questoesContainer.innerHTML = ""; // Limpa as questões atuais
 
@@ -138,6 +149,12 @@ function mudarConteudo(aula) {
       `;
         questoesContainer.appendChild(divQuestao);
     });
+
+    // Desabilita o botão de avançar
+    document.getElementById("avancar").disabled = true;
+    if (aula !== "aula1") {
+        document.getElementById("avancar").disabled = false;
+    }
 }
 
 function submitAnswers() {
@@ -147,7 +164,8 @@ function submitAnswers() {
     // Verifica as respostas
     questoes.forEach((questao, index) => {
         const selected = questao.querySelector('input[type="radio"]:checked');
-        if (selected && selected.value === "a") { // Aqui você define a resposta correta
+        const respostaCorreta = aulas[aulaAtual].questoes[index].respostaCorreta;
+        if (selected && selected.value === respostaCorreta) {
             acertos++;
         }
     });
@@ -155,5 +173,24 @@ function submitAnswers() {
     // Exibe o resultado
     const resultadoDiv = document.getElementById("resultado");
     resultadoDiv.innerHTML = `<h3>Você acertou ${acertos} de ${questoes.length} questões.</h3>`;
+
+    // Habilita o botão de avançar se todas as questões estiverem corretas
+    if (acertos === questoes.length) {
+        document.getElementById("avancar").disabled = false;
+    }
 }
 
+function avancarAula() {
+    // Avança para a próxima aula
+    if (aulaAtual === "aula1") {
+        mudarConteudo("aula2");
+        document.getElementById("selecionar-aula").value = "aula2";
+        document.querySelector('option[value="aula2"]').disabled = false;
+    } else if (aulaAtual === "aula2") {
+        mudarConteudo("aula3");
+        document.getElementById("selecionar-aula").value = "aula3";
+        document.querySelector('option[value="aula3"]').disabled = false;
+    }
+}
+
+mudarConteudo("aula1"); // Começa na primeira aula
